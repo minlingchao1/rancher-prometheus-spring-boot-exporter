@@ -87,7 +87,7 @@ class RancherClient:
     return result
     
   def get_self_hostname(self):
-    return requests.get('http://rancher-metadata/2015-12-19/self/host/hostName').content
+    return requests.get('http://rancher-metadata/2015-12-19/self/host/hostName').content.decode('utf-8')
     
   def filter(self, data):
     if data['host'] != self.self_host:
