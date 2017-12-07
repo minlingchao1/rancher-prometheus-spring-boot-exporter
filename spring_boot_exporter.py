@@ -109,7 +109,6 @@ class MetricsReader:
     self.registry = registry
     self._counters = {}
     self._gauges = {}
-    self._summaries = {}
   
   def _format_metrics_url(self, app):
     return "http://{url}:8080/metrics".format(url=app['ip'])
@@ -138,13 +137,6 @@ class MetricsReader:
       
     self._gauges[metric_name].labels(name=app['name'], stackName=app['stack-name'], ip=app['ip']).set(value)
   
-  def _register_summary(self, app, metric_name, value):
-    if not metric_name in self._summaries:
-      summary = Summary(metric_name, metric_name, ['name', 'stackName', 'ip'], registry=self.registry)
-      self._summaries[metric_name] = summary
-    
-    self._summaries[metric_name].labels(name=app['name'], stackName=app['stack-name'], ip=app['ip']).observe(value)
-  
   def register_metrics(self, app):
     metrics = self.load_metrics(app)
     if metrics is None:
@@ -155,10 +147,8 @@ class MetricsReader:
       
       if m.find('counter') == 0:
         self._register_counter(app, metric_name[8:], metrics[m])
-      elif m.find('gauge') == 0:
-        self._register_gauge(app, metric_name[6:], metrics[m])
       else:
-        self._register_summary(app, metric_name, metrics[m])
+        self._register_gauge(app, metric_name, metrics[m])
         
 PARSED = None        
 def generate_registry():
